@@ -1,7 +1,13 @@
 startCode
 =========
 
-Application to setup start-up code files to facilitate programming
+  Author: Kushal Prasad
+  Date: 12 July 2014
+
+  startCode is an application to setup start-up code files with desired content to facilitate programming. 
+Some default templates are provided, although a user may customize the startup files by editing the options.cfg file.
+Use and share!
+
 
 Setup guide:
 
@@ -21,13 +27,7 @@ Setup guide:
       NOTE: requires super-user privileges.
       
 
-HELP :
 
-  startCode is an application to create or fill startup content for
-  programming code files. 
- 
-  Author: Kushal Prasad
-  Date: 12 July 2014
  
 Usage: 
        startCode options filename destdir
