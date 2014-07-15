@@ -39,16 +39,21 @@
 
 #include <sys/types.h>
 #include <dirent.h>
+#include <pwd.h>
 #include "startCode.h"
 
 #define ARGUMENT_MIN 4
 #define ARGUMENT_MAX 4
 
 
+char file_path[256];
 
 /******************** MAIN METHOD ******************************/
 int main (int argc, char** argv)
 {
+    struct passwd *pw = getpwuid(getuid());
+    strcpy(file_path, pw->pw_dir);
+    printf("\n Home dir : %s\n", file_path); 
     // Send arguments to get verified
     // Get back the mode of operation
     int mode = chk_args(argc, argv);
@@ -79,33 +84,47 @@ int chk_args(int argc, char** argv)
         exit(0);
     }
 
-    // check mode and validity of [option]
-    if(argc == 4)
+    int def = 0;
+    char temp[256];
+    strcpy(temp, file_path);
+    FILE *optPtr = fopen(strcat(temp,"/.startCode/templates/options.cfg"),"r");
+    if(optPtr == NULL)
     {
-        if(!strcmp(argv[1],"-cc"))
-        {
-            ret = 1;
-        }
-        else if(!strcmp(argv[1],"-ch"))
-        {
-            ret = 2;
-        }
-        else if(!strcmp(argv[1],"-m"))
-        {
-            ret = 3;
-        }
+        printf("\n Could not find ~/.startCode/options.cfg! Using defaults... \n");
+        printf(" Use startCode --help or startCode -h for default usage options\n");
+        def = 1;
     }
-    else if(!strcmp(argv[1],"-h"))
+
+//    if(def == 1) /* Default mode */
     {
-        // Display HELP and exit
-        manprint("");
-        exit(0);
-    }
-    else
-    {
-        // Invalid
-        manprint("Incorrect usage!");
-        exit(0);
+        // check mode and validity of [option]
+        if(argc == 4)
+        {
+            if(!strcmp(argv[1],"-cc"))
+            {
+                ret = 1;
+            }
+            else if(!strcmp(argv[1],"-ch"))
+            {
+                ret = 2;
+            }
+            else if(!strcmp(argv[1],"-m"))
+            {
+                ret = 3;
+            }
+        }
+        else if(!strcmp(argv[1],"-h"))
+        {
+            // Display HELP and exit
+            manprint("");
+            exit(0);
+        }
+        else
+        {
+            // Invalid
+            manprint("Incorrect usage!");
+            exit(0);
+        }
     }
     
     // Check filename validity
@@ -211,12 +230,15 @@ int setup_file(int mode, char** argv)
 
     // Fill file with content from defaults based on mode
     // Set source pointer.
+    char temp[256];
+    strcpy(temp,file_path);
     FILE *srcPtr;
     switch(mode)
     {
         // C program code case
         case 1:
-                srcPtr = fopen("/home/kushal/.codeTemplate/templates/ccode.template","r");
+                srcPtr = fopen(strcat(temp,"/.startCode/templates/ccode.template"),"r");
+                printf("\n Path : %s\n",temp);
                 if( srcPtr == NULL )
                 {
                     printf("\n ERROR: Could not access template file ~/.codeTemplate/templates/ccode.template\n");
@@ -225,7 +247,7 @@ int setup_file(int mode, char** argv)
                 break;
         // C program header case
         case 2:
-                srcPtr = fopen("~/.codeTemplate/templates/cheader.template","r");
+                srcPtr = fopen(strcat(temp,"/.startCode/templates/cheader.template"),"r");
                 if( srcPtr == NULL )
                 {
                     printf("\n ERROR: Could not access template file ~/.codeTemplate/templates/cheader.template\n");
@@ -234,7 +256,7 @@ int setup_file(int mode, char** argv)
                 break;
         // Makefile case
         case 3:
-                srcPtr = fopen("~/.codeTemplate/templates/makefile.template","r");
+                srcPtr = fopen(strcat(temp,"/.startCode/templates/makefile.template"),"r");
                 if( srcPtr == NULL )
                 {
                     printf("\n ERROR: Could not access template file ~/.codeTemplate/templates/makefile.template\n");
